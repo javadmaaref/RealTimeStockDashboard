@@ -1,249 +1,227 @@
 // app/static/js/main.js
 document.addEventListener('DOMContentLoaded', () => {
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const authForms = document.getElementById('authForms');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const getStockBtn = document.getElementById('getStockBtn');
-    const watchlist = document.getElementById('watchlist');
-    const addToWatchlistForm = document.getElementById('addToWatchlistForm');
-    
-    let stockChart;
+    // DOM
+    const ui = {
+        loginBtn: document.getElementById('loginBtn'),
+        registerBtn: document.getElementById('registerBtn'),
+        logoutBtn: document.getElementById('logoutBtn'),
+        authForms: document.getElementById('authForms'),
+        loginForm: document.getElementById('loginForm'),
+        registerForm: document.getElementById('registerForm'),
+        getStockBtn: document.getElementById('getStockBtn'),
+        watchlist: document.getElementById('watchlist'),
+        addToWatchlistForm: document.getElementById('addToWatchlistForm')
+    };
 
-    loginBtn.addEventListener('click', () => {
-        authForms.classList.remove('hidden');
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-    });
+    let stockChart = null;
 
-    registerBtn.addEventListener('click', () => {
-        authForms.classList.remove('hidden');
-        registerForm.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-    });
+    // Event listeners
+    ui.loginBtn.onclick = () => {
+        ui.authForms.classList.remove('hidden');
+        ui.loginForm.classList.remove('hidden');
+        ui.registerForm.classList.add('hidden');
+    };
 
-    loginForm.addEventListener('submit', async (e) => {
+    ui.registerBtn.onclick = () => {
+        ui.authForms.classList.remove('hidden');
+        ui.registerForm.classList.remove('hidden');
+        ui.loginForm.classList.add('hidden');
+    };
+
+    // Form submissions
+    ui.loginForm.onsubmit = async (e) => {
         e.preventDefault();
-        const username = document.getElementById('loginUsername').value;
-        const password = document.getElementById('loginPassword').value;
+        const formData = {
+            username: document.getElementById('loginUsername').value,
+            password: document.getElementById('loginPassword').value
+        };
 
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-        });
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(formData)
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            alert(data.message);
-            updateUIAfterLogin();
-        } else {
-            alert(data.error);
+            const data = await response.json();
+            alert(response.ok ? data.message : data.error);
+            if (response.ok) updateUIAfterLogin();
+        } catch (err) {
+            alert('Login failed. Please try again.');
         }
-    });
+    };
 
-    registerForm.addEventListener('submit', async (e) => {
+    ui.registerForm.onsubmit = async (e) => {
         e.preventDefault();
-        const username = document.getElementById('registerUsername').value;
-        const password = document.getElementById('registerPassword').value;
-        const phone = document.getElementById('registerPhone').value;
-        const email = document.getElementById('registerEmail').value;
+        const formData = {
+            username: document.getElementById('registerUsername').value,
+            password: document.getElementById('registerPassword').value,
+            phone: document.getElementById('registerPhone').value,
+            email: document.getElementById('registerEmail').value
+        };
 
-        const response = await fetch('/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}`,
-        });
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(formData)
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            alert(data.message);
-            updateUIAfterLogin();
-        } else {
-            alert(data.error);
+            const data = await response.json();
+            alert(response.ok ? data.message : data.error);
+            if (response.ok) updateUIAfterLogin();
+        } catch (err) {
+            alert('Registration failed. Please try again.');
         }
-    });
+    };
 
-    logoutBtn.addEventListener('click', async () => {
-        const response = await fetch('/logout');
-        const data = await response.json();
-        if (response.ok) {
-            alert(data.message);
-            updateUIAfterLogout();
+    ui.logoutBtn.onclick = async () => {
+        try {
+            const response = await fetch('/logout');
+            const data = await response.json();
+            if (response.ok) {
+                alert(data.message);
+                updateUIAfterLogout();
+            }
+        } catch (err) {
+            alert('Logout failed. Please try again.');
         }
-    });
+    };
 
-    getStockBtn.addEventListener('click', async () => {
+    // Stock functionality
+    ui.getStockBtn.onclick = () => {
         const symbol = document.getElementById('stockSymbol').value;
-        await fetchStockData(symbol);
-    });
+        fetchStockData(symbol);
+    };
 
-    addToWatchlistForm.addEventListener('submit', async (e) => {
+    ui.addToWatchlistForm.onsubmit = async (e) => {
         e.preventDefault();
-        const symbol = document.getElementById('watchlistSymbol').value;
-        const alertPrice = document.getElementById('alertPrice').value;
+        const formData = {
+            symbol: document.getElementById('watchlistSymbol').value,
+            alert_price: document.getElementById('alertPrice').value
+        };
 
-        const response = await fetch('/watchlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `symbol=${encodeURIComponent(symbol)}&alert_price=${encodeURIComponent(alertPrice)}`,
-        });
+        try {
+            const response = await fetch('/watchlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(formData)
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            alert(data.message);
-            fetchWatchlist();
-        } else {
-            alert(data.error);
+            const data = await response.json();
+            alert(response.ok ? data.message : data.error);
+            if (response.ok) fetchWatchlist();
+        } catch (err) {
+            alert('Failed to add to watchlist. Please try again.');
         }
-    });
+    };
 
+    // Helper functions
     async function fetchStockData(symbol) {
-        const response = await fetch(`/api/stock/${symbol}`);
-        const data = await response.json();
+        try {
+            const response = await fetch(`/api/stock/${symbol}`);
+            const data = await response.json();
 
-        if (response.ok) {
-            displayStockInfo(data);
-            await fetchHistoricalData(symbol);
-        } else {
-            alert(data.error);
+            if (response.ok) {
+                displayStockInfo(data);
+                fetchHistoricalData(symbol);
+            } else {
+                alert(data.error);
+            }
+        } catch (err) {
+            alert('Failed to fetch stock data. Please try again.');
         }
     }
 
     function displayStockInfo(data) {
-        const stockInfo = document.getElementById('stockInfo');
-        stockInfo.innerHTML = `
-            <h2>${data.symbol}</h2>
+        document.getElementById('stockInfo').innerHTML = `
+            <h3>${data.symbol}</h3>
             <p>Price: $${data.price}</p>
             <p>Last Updated: ${data.datetime}</p>
         `;
     }
 
-async function fetchHistoricalData(symbol) {
-    try {
-        const response = await fetch(`/api/historical/${symbol}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('Historical data received:', data);
+    async function fetchHistoricalData(symbol) {
+        try {
+            const response = await fetch(`/api/historical/${symbol}`);
+            const data = await response.json();
 
-        if (data && data.length > 0) {
-            displayChart(data);
-        } else {
-            console.error('No data received from API');
-            alert('No historical data available for this stock.');
+            if (data?.length) {
+                displayChart(data);
+            } else {
+                alert('No historical data available for this stock.');
+            }
+        } catch (err) {
+            alert('Failed to fetch historical data. Please try again.');
         }
-    } catch (error) {
-        console.error('Error fetching historical data:', error);
-        alert('Error fetching historical data. Please try again.');
     }
-}
 
     function displayChart(data) {
-        console.log('Displaying chart with data:', data);
-
         const ctx = document.getElementById('stockChart');
+        if (stockChart) stockChart.destroy();
 
-        if (!ctx) {
-            console.error('Canvas element not found');
-            return;
-        }
-
-        if (stockChart) {
-            stockChart.destroy();
-        }
-
-        const chartData = data.map(item => ({
-            x: new Date(item.datetime),
-            y: item.price
-        }));
-
-        console.log('Chart data:', chartData);
-
-        try {
-            stockChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'Stock Price',
-                        data: chartData,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Price'
-                            }
-                        }
+        stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Stock Price',
+                    data: data.map(item => ({
+                        x: new Date(item.datetime),
+                        y: item.price
+                    })),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { unit: 'day' },
+                        title: { display: true, text: 'Date' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Price' }
                     }
                 }
-            });
-            console.log('Chart created successfully');
-        } catch (error) {
-            console.error('Error creating chart:', error);
-        }
+            }
+        });
     }
 
     async function fetchWatchlist() {
-        const response = await fetch('/watchlist');
-        const data = await response.json();
+        try {
+            const response = await fetch('/watchlist');
+            const data = await response.json();
 
-        if (response.ok) {
-            displayWatchlist(data);
-        } else {
-            alert(data.error);
+            if (response.ok) {
+                displayWatchlist(data);
+            } else {
+                alert(data.error);
+            }
+        } catch (err) {
+            alert('Failed to fetch watchlist. Please try again.');
         }
     }
 
     function displayWatchlist(data) {
-        const watchlistItems = document.getElementById('watchlistItems');
-        watchlistItems.innerHTML = '';
-
-        data.forEach(stock => {
-            const li = document.createElement('li');
-            li.textContent = `${stock.symbol} - Alert Price: $${stock.alert_price}`;
-            watchlistItems.appendChild(li);
-        });
+        const list = document.getElementById('watchlistItems');
+        list.innerHTML = data.map(stock =>
+            `<li>${stock.symbol} - Alert Price: $${stock.alert_price}</li>`
+        ).join('');
     }
 
     function updateUIAfterLogin() {
-        loginBtn.classList.add('hidden');
-        registerBtn.classList.add('hidden');
-        logoutBtn.classList.remove('hidden');
-        authForms.classList.add('hidden');
-        watchlist.classList.remove('hidden');
+        [ui.loginBtn, ui.registerBtn, ui.authForms].forEach(el => el.classList.add('hidden'));
+        [ui.logoutBtn, ui.watchlist].forEach(el => el.classList.remove('hidden'));
         fetchWatchlist();
     }
 
     function updateUIAfterLogout() {
-        loginBtn.classList.remove('hidden');
-        registerBtn.classList.remove('hidden');
-        logoutBtn.classList.add('hidden');
-        authForms.classList.add('hidden');
-        watchlist.classList.add('hidden');
+        [ui.loginBtn, ui.registerBtn].forEach(el => el.classList.remove('hidden'));
+        [ui.logoutBtn, ui.watchlist, ui.authForms].forEach(el => el.classList.add('hidden'));
     }
 });

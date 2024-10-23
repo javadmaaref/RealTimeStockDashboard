@@ -4,57 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real-Time Stock Price Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Chart.js and Date-fns -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Real-Time Stock Price Dashboard</h1>
+        <!-- Header -->
+        <header>
+            <h1>Real-Time Stock Price Dashboard</h1>
+            <div id="userActions">
+                <button id="loginBtn" class="btn btn-primary">Login</button>
+                <button id="registerBtn" class="btn btn-secondary">Register</button>
+                <button id="logoutBtn" class="btn btn-danger hidden">Logout</button>
+            </div>
+        </header>
 
-        <div id="userActions">
-            <button id="loginBtn">Login</button>
-            <button id="registerBtn">Register</button>
-            <button id="logoutBtn" class="hidden">Logout</button>
-        </div>
-
-        <div id="authForms" class="hidden">
-            <form id="loginForm" class="hidden">
-                <h2>Login</h2>
+        <!-- Authentication -->
+        <div id="authForms" class="card hidden">
+            <!-- Login Form -->
+            <form id="loginForm">
                 <input type="text" id="loginUsername" placeholder="Username" required>
                 <input type="password" id="loginPassword" placeholder="Password" required>
-                <button type="submit">Login</button>
+                <button type="submit" class="btn btn-primary">Login</button>
             </form>
 
+            <!-- Register Form -->
             <form id="registerForm" class="hidden">
-                <h2>Register</h2>
                 <input type="text" id="registerUsername" placeholder="Username" required>
                 <input type="password" id="registerPassword" placeholder="Password" required>
                 <input type="tel" id="registerPhone" placeholder="Phone Number">
                 <input type="email" id="registerEmail" placeholder="Email">
-                <button type="submit">Register</button>
+                <button type="submit" class="btn btn-secondary">Register</button>
             </form>
         </div>
 
-        <div id="stockActions">
-            <input type="text" id="stockSymbol" placeholder="Enter stock symbol">
-            <button id="getStockBtn">Get Stock Data</button>
+        <!-- Stock Info -->
+        <div class="card">
+            <h2>Stock Information</h2>
+            <div id="stockActions">
+                <input type="text" id="stockSymbol" placeholder="Enter stock symbol">
+                <button id="getStockBtn" class="btn btn-primary">Get Stock Data</button>
+            </div>
+            <!-- Display fetched stock info -->
+            <div id="stockInfo"></div>
+            <!-- Container for price chart -->
+            <div class="chart-container">
+                <canvas id="stockChart"></canvas>
+            </div>
         </div>
 
-        <div id="stockInfo"></div>
-        <canvas id="stockChart"></canvas>
-
-        <div id="watchlist" class="hidden">
+        <!-- Watchlist -->
+        <div id="watchlist" class="card hidden">
             <h2>Your Watchlist</h2>
-            <ul id="watchlistItems"></ul>
             <form id="addToWatchlistForm">
                 <input type="text" id="watchlistSymbol" placeholder="Stock symbol" required>
                 <input type="number" id="alertPrice" placeholder="Alert price" step="0.01" required>
-                <button type="submit">Add to Watchlist</button>
+                <button type="submit" class="btn btn-secondary">Add to Watchlist</button>
             </form>
+            <!-- User's watchlist -->
+            <ul id="watchlistItems"></ul>
         </div>
     </div>
 
+    <!-- JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
