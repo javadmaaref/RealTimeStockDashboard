@@ -1,6 +1,16 @@
 # Real-Time Stock Price Dashboard
 
+![Demo of the code](./assets/demo.gif)
+
 A personal project exploring the visualization of real-time stock prices. Built using Flask, JavaScript, and Chart.js, this application allows users to track stock performance, create watchlists, and receive alerts for significant price changes. This project serves as a platform for further experimentation with data visualization and real-time applications.
+
+
+## Features
+- User Authentication
+- Real-Time Stock Data
+- Historical Data Visualization
+- Personalized Watchlist
+- Price Alert Notifications (Email/SMS)
 
 ## Installation
 
